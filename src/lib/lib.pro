@@ -27,7 +27,7 @@ isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=$$WORK_DIR/build
 
 PROVIDER = VendorName
 
-LIBS += -L$$IDE_PLUGIN_PATH/Nokia
+LIBS += -L$$(QTC_BUILD) -L$$(QTC_BUILD)/plugins/QtProject
 
 # CodeCoverage files
 include(codecoverage.pri)

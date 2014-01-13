@@ -41,7 +41,11 @@ void Visualizer::refreshMarks()
     QList<Node *> leafs = rootNode->getLeafs();
 
     foreach (Node *leaf, leafs) {
+        if (!leaf->isFileNode())
+            continue;
+
         FileNode *fileNode = static_cast<FileNode *>(leaf);
+
         QString fileName = fileNode->getFullAbsoluteName().replace(QRegExp(QLatin1String("(Sources|Headers)/")), QLatin1String(""));
         const LineHitList &lineHitList = fileNode->getLineHitList();
 

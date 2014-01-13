@@ -37,6 +37,11 @@ QIcon Node::getIcon() const
     return QIcon();
 }
 
+bool Node::isFileNode() const
+{
+    return false;
+}
+
 QString Node::getFullAbsoluteName() const
 {
     if (!parent)

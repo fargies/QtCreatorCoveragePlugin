@@ -20,8 +20,7 @@ void CleanExecutor::execute()
     ProjectExplorerPlugin *projectExplorerPlugin = ProjectExplorerPlugin::instance();
     Project *project = projectExplorerPlugin->startupProject();
 
-    ProjectNode *rootProjectNode = project->rootProjectNode();
-    const QString &activeRunConfigurationDir = getRunConfigurationPath(rootProjectNode, project->activeTarget()->activeRunConfiguration());
+    const QString &activeRunConfigurationDir = getRunConfigurationPath(project->activeTarget()->activeRunConfiguration());
 
     const QString &buildDir = activeRunConfigurationDir.mid(0, activeRunConfigurationDir.lastIndexOf(QLatin1Char('/')));
     const QString &objectFilesDir = getObjectFilesDir(buildDir);

@@ -27,6 +27,6 @@ private Q_SLOTS:
     void handleCoverageResults(int code,QProcess::ExitStatus exitStatus);
 
 protected:
-    QString getRunConfigurationPath(ProjectExplorer::ProjectNode *root, ProjectExplorer::RunConfiguration *activeRunConfiguration) const;
+    QString getRunConfigurationPath(ProjectExplorer::RunConfiguration *activeRunConfiguration) const;
     QString getObjectFilesDir(const QString &buildDir) const;
 };

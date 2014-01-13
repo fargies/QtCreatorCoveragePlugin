@@ -11,6 +11,7 @@ public:
 
     QVariant getData() const;
     QIcon getIcon() const;
+    bool isFileNode() const;
 
     LineHitList getLineHitList() const;
     void setLineHitList(const LineHitList &lineHitList);

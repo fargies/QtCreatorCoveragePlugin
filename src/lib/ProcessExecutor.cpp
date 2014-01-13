@@ -5,6 +5,7 @@
 #include <projectexplorer/target.h>
 #include <projectexplorer/projectnodes.h>
 #include <projectexplorer/runconfiguration.h>
+#include <projectexplorer/localapplicationrunconfiguration.h>
 
 #include <QDebug>
 
@@ -24,8 +25,7 @@ void ProcessExecutor::execute()
     ProjectExplorerPlugin *projectExplorerPlugin = ProjectExplorerPlugin::instance();
     Project *project = projectExplorerPlugin->startupProject();
 
-    ProjectNode *rootProjectNode = project->rootProjectNode();
-    const QString &activeRunConfigurationDir = getRunConfigurationPath(rootProjectNode, project->activeTarget()->activeRunConfiguration());
+    const QString &activeRunConfigurationDir = getRunConfigurationPath(project->activeTarget()->activeRunConfiguration());
 
     const QString &buildDir = activeRunConfigurationDir.mid(0, activeRunConfigurationDir.lastIndexOf(QLatin1Char('/')));
     const QString &objectFilesDir = getObjectFilesDir(buildDir);
@@ -66,19 +66,13 @@ void ProcessExecutor::handleCoverageResults(int code, QProcess::ExitStatus exitS
 }
 
 //#TOTEST:
-QString ProcessExecutor::getRunConfigurationPath(ProjectExplorer::ProjectNode *parent, ProjectExplorer::RunConfiguration *activeRunConfiguration) const
+QString ProcessExecutor::getRunConfigurationPath(ProjectExplorer::RunConfiguration *activeRunConfiguration) const
 {
     using namespace ProjectExplorer;
-
-    foreach (ProjectNode *projectNode, parent->subProjectNodes()) {
-        foreach (RunConfiguration *runConfiguration, projectNode->runConfigurationsFor(projectNode))
-            if (runConfiguration == activeRunConfiguration)
-                return projectNode->path();
-
-        const QString &runConfigurationPath = getRunConfigurationPath(projectNode, activeRunConfiguration);
-        if (!runConfigurationPath.isEmpty())
-            return runConfigurationPath;
-    }
+    LocalApplicationRunConfiguration *localConf =
+        qobject_cast<LocalApplicationRunConfiguration *>(activeRunConfiguration);
+    if (localConf)
+        return localConf->workingDirectory();
 
     return QString();
 }

@@ -36,6 +36,11 @@ QIcon FileNode::getIcon() const
     return Node::getIcon();
 }
 
+bool FileNode::isFileNode() const
+{
+    return true;
+}
+
 LineHitList FileNode::getLineHitList() const
 {
     return lineHitList;

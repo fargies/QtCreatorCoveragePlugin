@@ -15,6 +15,7 @@ public:
 
     virtual QVariant getData() const;
     virtual QIcon getIcon() const;
+    virtual bool isFileNode() const;
 
     virtual QString getFullAbsoluteName() const;
     QString getFullName() const;

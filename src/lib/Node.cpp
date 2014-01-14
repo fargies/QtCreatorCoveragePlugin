@@ -27,7 +27,12 @@ Node::~Node()
         parent->removeChild(this);
 }
 
-QVariant Node::getData() const
+QVariant Node::getLineData() const
+{
+    return QVariant();
+}
+
+QVariant Node::getBranchData() const
 {
     return QVariant();
 }

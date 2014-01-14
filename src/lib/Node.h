@@ -13,7 +13,8 @@ public:
     Node(const QString &name = QString(), Node *parent = 0);
     virtual ~Node();
 
-    virtual QVariant getData() const;
+    virtual QVariant getLineData() const;
+    virtual QVariant getBranchData() const;
     virtual QIcon getIcon() const;
     virtual bool isFileNode() const;
 

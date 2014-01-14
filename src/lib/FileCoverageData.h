@@ -17,6 +17,23 @@ struct LineHit {
 
 typedef QList<LineHit> LineHitList;
 
+struct BranchCoverage {
+    BranchCoverage() : pos(0), count(0), covered(0) {}
+    BranchCoverage(int pos, int count, int covered) :
+        pos(pos), count(count), covered(covered) {}
+
+    int pos;
+    int count;
+    int covered;
+
+    inline bool operator ==(const BranchCoverage &other) const {
+        return pos == other.pos && count == other.count
+                && covered == other.covered;
+    }
+};
+
+typedef QList<BranchCoverage> BranchCoverageList;
+
 struct FileCoverageData
 {
     FileCoverageData() {}
@@ -29,6 +46,7 @@ struct FileCoverageData
 
     QString fileName;
     LineHitList lineHitList;
+    BranchCoverageList branchCoverageList;
 };
 
 typedef QList<FileCoverageData> FileCoverageDataList;

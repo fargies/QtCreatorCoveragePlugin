@@ -13,7 +13,7 @@ Parser::Parser(const QStringList &fileNames, const QString &content) :
 void Parser::execute()
 {
     foreach (const QString fileName, fileNames) {
-        const QString &fileCoverageDataContent = getFileCoverageDataContentByName(fileName);
+        const QStringList &fileCoverageDataContent = getFileCoverageDataContentByName(fileName);
         const FileCoverageData &fileCoverageData = parseFileCoverageDataContent(fileName, fileCoverageDataContent);
         if (fileCoverageData.isValid())
             fileCoverageDataList.append(fileCoverageData);
@@ -25,38 +25,78 @@ FileCoverageDataList Parser::getFileCoverageDataList() const
     return fileCoverageDataList;
 }
 
-QString Parser::getFileCoverageDataContentByName(const QString &fileName) const
+QStringList Parser::getFileCoverageDataContentByName(const QString &fileName) const
 {
-    int beginIndex = content.indexOf(QString(QLatin1String("SF:%1")).arg(fileName));
-    int endIndex = content.indexOf(QLatin1String("end_of_record"), beginIndex);
+    QStringList ret;
+    QString beginPattern = QString(QLatin1String("SF:%1")).arg(fileName);
 
-    if (beginIndex != INDEX_NOT_FOUND && endIndex != INDEX_NOT_FOUND)
-        return content.mid(beginIndex, endIndex - beginIndex);
+    /* info files might contain more than one section for a given file */
+    int idx = 0;
+    do {
+        int beginIndex = content.indexOf(beginPattern, idx);
+        int endIndex = content.indexOf(QLatin1String("end_of_record"), beginIndex);
 
-    return QString();
+        if (beginIndex != INDEX_NOT_FOUND && endIndex != INDEX_NOT_FOUND)
+            ret << content.mid(beginIndex, endIndex - beginIndex).split(QLatin1Char('\n'));
+        idx = endIndex;
+    } while (idx != INDEX_NOT_FOUND);
+
+    return ret;
 }
 
-FileCoverageData Parser::parseFileCoverageDataContent(const QString &fileName, const QString &fileCoverageDataContent) const
+FileCoverageData Parser::parseFileCoverageDataContent(const QString &fileName, const QStringList &fileCoverageDataContent) const
 {
     if (fileCoverageDataContent.isEmpty())
         return FileCoverageData();
 
     FileCoverageData fileCoverageData(fileName);
-    parseLineHit(&fileCoverageData.lineHitList, fileCoverageDataContent.split(QLatin1Char('\n')));
+    parseCoverageData(fileCoverageData, fileCoverageDataContent);
 
     return fileCoverageData;
 }
 
-void Parser::parseLineHit(LineHitList *lineHitList, const QStringList &fileCoverageDataStringList) const
+void Parser::parseCoverageData(FileCoverageData &data, const QStringList &fileCoverageDataStringList) const
 {
-    const QRegExp rx(QLatin1String("^DA:(\\d+),(\\d+)"));
+    const QRegExp rxLh(QLatin1String("^DA:(\\d+),(\\d+)"));
+    const QRegExp rxBc(QLatin1String("^BRDA:(\\d+),(\\d+),(\\d+),(\\d+|-)"));
+    QMap<int, QSet<int> > bCovBranchs;
+    QMap<int, QSet<int> > bCovCovered; /* a branch can be processed several
+                                          times, thus we have to use a set to
+                                          count covered branches */
+    QMap<int, LineHit> lHitMap;
+
     foreach (const QString &fileCoverageDataString, fileCoverageDataStringList) {
-        int pos = rx.indexIn(fileCoverageDataString);
-        if (pos > -1) {
-            LineHit lineHit;
-            lineHit.pos = rx.cap(1).toInt();
-            lineHit.hit = rx.cap(2).toInt();
-            lineHitList->append(lineHit);
+        if (fileCoverageDataString.startsWith(QLatin1String("DA:"))) {
+            int pos = rxLh.indexIn(fileCoverageDataString);
+            if (pos > -1)
+                lHitMap[rxLh.cap(1).toInt()].hit += rxLh.cap(2).toInt();
+        }
+        else if (fileCoverageDataString.startsWith(QLatin1String("BRDA:"))) {
+            int pos = rxBc.indexIn(fileCoverageDataString);
+            if (pos > -1) {
+                int line = rxBc.cap(1).toInt();
+                int branch = rxBc.cap(3).toInt();
+
+                bCovBranchs[line].insert(branch);
+
+                const QString &hit = rxBc.cap(4);
+                if (hit != QLatin1String("-") &&
+                        hit != QLatin1String("0"))
+                    bCovCovered[line].insert(branch);
+            }
         }
     }
+
+    data.branchCoverageList.clear();
+    QMap<int, QSet<int> >::const_iterator bCovIt(bCovBranchs.constBegin());
+    for (; bCovIt != bCovBranchs.constEnd(); ++bCovIt)
+        data.branchCoverageList.append(BranchCoverage(bCovIt.key(),
+                                                      bCovIt.value().size(),
+                                                      bCovCovered.value(bCovIt.key()).size()));
+
+    QMap<int, LineHit>::iterator lHitIt(lHitMap.begin());
+    for (; lHitIt != lHitMap.end(); ++lHitIt)
+        lHitIt.value().pos = lHitIt.key();
+
+    data.lineHitList = lHitMap.values();
 }

@@ -18,7 +18,7 @@ public:
     FileCoverageDataList getFileCoverageDataList() const;
 
 private:
-    QString getFileCoverageDataContentByName(const QString &fileName) const;
-    FileCoverageData parseFileCoverageDataContent(const QString &fileName, const QString &fileCoverageDataContent) const;
-    void parseLineHit(LineHitList *lineHitList, const QStringList &fileCoverageDataStringList) const;
+    QStringList getFileCoverageDataContentByName(const QString &fileName) const;
+    FileCoverageData parseFileCoverageDataContent(const QString &fileName, const QStringList &fileCoverageDataContent) const;
+    void parseCoverageData(FileCoverageData &data, const QStringList &fileCoverageDataStringList) const;
 };

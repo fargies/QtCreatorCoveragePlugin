@@ -5,13 +5,14 @@
 #include <coreplugin/fileiconprovider.h>
 
 #include <QObject>
+#include <QDebug>
 
 FileNode::FileNode(const QString &name, Node *parent) :
     Node(name, parent)
 {
 }
 
-QVariant FileNode::getData() const
+QVariant FileNode::getLineData() const
 {
     if (lineHitList.isEmpty())
         return QLatin1String("-");
@@ -23,6 +24,26 @@ QVariant FileNode::getData() const
 
     double linesCoveredPercentage = linesCovered *100 / (double)lineHitList.size();
     return QObject::tr("%1%").arg(QString::number(linesCoveredPercentage, 'f', 1));
+}
+
+QVariant FileNode::getBranchData() const
+{
+    if (branchCoverageList.isEmpty())
+        return QLatin1String("-");
+
+    int branchesCovered = 0;
+    int branches = 0;
+    foreach (const BranchCoverage &branch, branchCoverageList)
+    {
+        branchesCovered += branch.covered;
+        branches += branch.count;
+    }
+
+    if (branches == 0)
+        return QLatin1String("-"); /* shouldn't happen */
+
+    double branchCoveredPercentage = branchesCovered * 100 / (double) branches;
+    return QObject::tr("%1%").arg(QString::number(branchCoveredPercentage, 'f', 1));
 }
 
 QIcon FileNode::getIcon() const
@@ -49,4 +70,14 @@ LineHitList FileNode::getLineHitList() const
 void FileNode::setLineHitList(const LineHitList &lineHitList)
 {
     this->lineHitList = lineHitList;
+}
+
+BranchCoverageList FileNode::getBranchCoverageList() const
+{
+    return branchCoverageList;
+}
+
+void FileNode::setBranchCoverageList(const BranchCoverageList &branchCoverage)
+{
+    this->branchCoverageList = branchCoverage;
 }

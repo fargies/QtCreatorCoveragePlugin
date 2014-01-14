@@ -48,9 +48,13 @@ void Visualizer::refreshMarks()
 
         QString fileName = fileNode->getFullAbsoluteName().replace(QRegExp(QLatin1String("(Sources|Headers)/")), QLatin1String(""));
         const LineHitList &lineHitList = fileNode->getLineHitList();
+        const BranchCoverageList &branchCoverageList = fileNode->getBranchCoverageList();
 
         foreach (const LineHit &lineHit, lineHitList) {
             markManager->addMark(fileName, lineHit.pos, lineHit.hit);
+        }
+        foreach (const BranchCoverage &branchCoverage, branchCoverageList) {
+            markManager->addMark(fileName, branchCoverage.pos, branchCoverage.count == branchCoverage.covered);
         }
     }
 }

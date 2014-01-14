@@ -37,6 +37,7 @@ void ProjectTreeFiller::execute()
         if (leafNode) {
             FileNode *fileNode = static_cast<FileNode *>(leafNode);
             fileNode->setLineHitList(fileCoverageData.lineHitList);
+            fileNode->setBranchCoverageList(fileCoverageData.branchCoverageList);
         }
     }
 }

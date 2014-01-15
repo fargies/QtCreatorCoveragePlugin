@@ -2,18 +2,28 @@
 
 #include <QObject>
 
-#include <QMultiHash>
+#include <QHash>
+#include <QMap>
+
+#include "Mark.h"
 
 class Mark;
 class MarkManager : public QObject
 {
     Q_OBJECT
-    QMultiHash<QString, Mark *> marks;
+
 public:
     explicit MarkManager(QObject *parent = 0);
     ~MarkManager();
 
+    typedef QMap<int, Mark *> FileMarks;
+
     void removeAllMarks();
 
-    void addMark(const QString &fileName, int lineNumber, int type);
+    Mark *addMark(const QString &fileName, int lineNumber);
+
+    FileMarks getMarks(const QString &fileName) const;
+
+protected:
+    QHash<QString, FileMarks> marks;
 };

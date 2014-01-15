@@ -1,13 +1,20 @@
 #include "LinePainter.h"
 
-LinePainter::LinePainter(QPlainTextEdit *textEdit, const QMap<int, int> &lineCoverage) :
-    LinePaintHandler(textEdit, lineCoverage)
+LinePainter::LinePainter(QPlainTextEdit *textEdit) :
+    LinePaintHandler(textEdit)
 {
 }
 
-QColor LinePainter::getColorForValue(int value) const
+QColor LinePainter::getColorForValue(Mark::Type value) const
 {
-    const QColor green(0, 255, 0, 20);
-    const QColor red(255, 0, 0, 20);
-    return value > 0 ? green : red;
+    switch (value)
+    {
+    case Mark::Good:
+        return QColor(0, 255, 0, 60);
+    case Mark::NotBranchCovered:
+        return QColor(255, 144, 0, 60);
+    default:
+    case Mark::NotHit:
+        return QColor(255, 0, 0, 60);
+    }
 }

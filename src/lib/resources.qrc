@@ -1,15 +1,16 @@
 <RCC>
-    <qresource prefix="/icons">
-        <file>images/minus.png</file>
-        <file>images/plus.png</file>
-        <file>images/run.png</file>
-        <file>images/stop.png</file>
-        <file>images/headers.png</file>
-        <file>images/sources.png</file>
-        <file>images/qt_project.png</file>
-        <file>images/render.png</file>
+    <qresource prefix="/cov/icons">
+        <file alias="nothit.png">images/minus.png</file>
+        <file alias="good.png">images/plus.png</file>
+        <file alias="run.png">images/run.png</file>
+        <file alias="stop.png">images/stop.png</file>
+        <file alias="headers.png">images/headers.png</file>
+        <file alias="sources.png">images/sources.png</file>
+        <file alias="qt_project.png">images/qt_project.png</file>
+        <file alias="render.png">images/render.png</file>
+        <file alias="notbranchcovered.png">images/notbranchcovered.png</file>
     </qresource>
-    <qresource prefix="/animation">
-        <file>images/loading.gif</file>
+    <qresource prefix="/cov/animation">
+        <file alias="loading.gif">images/loading.gif</file>
     </qresource>
 </RCC>

@@ -15,9 +15,9 @@
 
 ActionManager::ActionManager(QObject *parent) :
     QObject(parent),
-    runAction(new QAction(QIcon(QLatin1String(":/icons/images/run.png")), tr("Run tests"), this)),
-    waitAction(new QAction(QIcon(QLatin1String(":/icons/images/stop.png")), tr("Stop coverage execution"), this)),
-    renderAction(new QAction(QIcon(QLatin1String(":/icons/images/render.png")), tr("Show code coverage"), this))
+    runAction(new QAction(QIcon(QLatin1String(":/cov/icons/run.png")), tr("Run tests"), this)),
+    waitAction(new QAction(QIcon(QLatin1String(":/cov/icons/stop.png")), tr("Stop coverage execution"), this)),
+    renderAction(new QAction(QIcon(QLatin1String(":/cov/icons/render.png")), tr("Show code coverage"), this))
 {
     renderAction->setCheckable(true);
 

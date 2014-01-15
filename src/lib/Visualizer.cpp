@@ -11,6 +11,7 @@
 #include <coreplugin/editormanager/editormanager.h>
 #include <coreplugin/editormanager/ieditor.h>
 #include <texteditor/itexteditor.h>
+#include <texteditor/basetexteditor.h>
 
 #include <QPlainTextEdit>
 #include <QScrollBar>
@@ -26,11 +27,11 @@ Visualizer::Visualizer(ProjectTreeManager *projectTreeManager, QAction *renderAc
     using namespace Core;
     EditorManager *editorManager = EditorManager::instance();
 
-    connect(editorManager,SIGNAL(currentEditorChanged(Core::IEditor*)),SLOT(renderCoverage()),Qt::QueuedConnection);
+    connect(editorManager,SIGNAL(currentEditorChanged(Core::IEditor*)),SLOT(renderCurrentCoverage()),Qt::QueuedConnection);
     connect(editorManager,SIGNAL(currentEditorChanged(Core::IEditor*)),SLOT(bindEditorToPainting(Core::IEditor*)));
 
-    connect(renderAction,SIGNAL(triggered(bool)),SLOT(renderCoverage()));
     connect(renderAction,SIGNAL(triggered(bool)),SLOT(repaintMarks(bool)));
+    connect(renderAction,SIGNAL(triggered(bool)),SLOT(renderCoverage()));
 }
 
 void Visualizer::refreshMarks()
@@ -51,44 +52,75 @@ void Visualizer::refreshMarks()
         const BranchCoverageList &branchCoverageList = fileNode->getBranchCoverageList();
 
         foreach (const LineHit &lineHit, lineHitList) {
-            markManager->addMark(fileName, lineHit.pos, lineHit.hit);
+            markManager->addMark(fileName, lineHit.pos)->setType((lineHit.hit != 0) ? Mark::Good : Mark::NotHit);
         }
+
         foreach (const BranchCoverage &branchCoverage, branchCoverageList) {
-            markManager->addMark(fileName, branchCoverage.pos, branchCoverage.count == branchCoverage.covered);
+            if (branchCoverage.count != branchCoverage.covered) {
+                markManager->addMark(fileName, branchCoverage.pos)->setType(
+                            branchCoverage.covered ? Mark::NotBranchCovered : Mark::NotHit);
+            }
         }
     }
+}
+
+static QPlainTextEdit *getTextEdit(Core::IEditor *editor)
+{
+    if (!editor)
+        return 0;
+
+    return qobject_cast<QPlainTextEdit *>(editor->widget());
 }
 
 void Visualizer::renderCoverage()
 {
     using namespace Core;
+    using namespace TextEditor;
 
     EditorManager *editorManager = EditorManager::instance();
-    IEditor *currentEditor = editorManager->currentEditor();
-    if (!currentEditor)
-        return;
 
-    QPlainTextEdit *plainTextEdit = qobject_cast<QPlainTextEdit *>(currentEditor->widget());
-    if (!plainTextEdit)
-        return;
-
-    if (renderAction->isChecked()) {
-        renderCoverage(plainTextEdit);
-    } else {
-        clearCoverage(plainTextEdit);
+    const QList<IEditor *> &editors = editorManager->openedEditors();
+    foreach (IEditor *editor, editors) {
+        if (renderAction->isChecked()) {
+            renderCoverage(editor);
+        } else {
+            clearCoverage(editor);
+        }
     }
 }
 
-void Visualizer::renderCoverage(QPlainTextEdit *plainTextEdit) const
+void Visualizer::renderCurrentCoverage()
 {
-    LinePainter painter(plainTextEdit, getLineCoverage());
-    painter.render();
+    using namespace Core;
+    using namespace TextEditor;
+
+    EditorManager *editorManager = EditorManager::instance();
+
+    if (renderAction->isChecked()) {
+        renderCoverage(editorManager->currentEditor());
+    } else {
+        clearCoverage(editorManager->currentEditor());
+    }
 }
 
-void Visualizer::clearCoverage(QPlainTextEdit *plainTextEdit) const
+void Visualizer::renderCoverage(Core::IEditor *editor) const
 {
-    LineCleaner cleaner(plainTextEdit, getLineCoverage());
-    cleaner.render();
+    QPlainTextEdit *plainTextEdit = getTextEdit(editor);
+     if (!plainTextEdit)
+         return;
+
+    LinePainter painter(plainTextEdit);
+    painter.render(getLineCoverage(editor));
+}
+
+void Visualizer::clearCoverage(Core::IEditor *editor) const
+{
+    QPlainTextEdit *plainTextEdit = getTextEdit(editor);
+     if (!plainTextEdit)
+         return;
+
+    LineCleaner cleaner(plainTextEdit);
+    cleaner.render(getLineCoverage(editor));
 }
 
 void Visualizer::bindEditorToPainting(Core::IEditor *editor)
@@ -97,8 +129,8 @@ void Visualizer::bindEditorToPainting(Core::IEditor *editor)
         return;
 
     if (QPlainTextEdit *plainTextEdit = qobject_cast<QPlainTextEdit *>(editor->widget())) {
-        connect(plainTextEdit,SIGNAL(cursorPositionChanged()),SLOT(renderCoverage()), Qt::UniqueConnection);
-        connect(plainTextEdit->verticalScrollBar(),SIGNAL(valueChanged(int)),SLOT(renderCoverage()),Qt::UniqueConnection);
+        connect(plainTextEdit,SIGNAL(cursorPositionChanged()),SLOT(renderCurrentCoverage()), Qt::UniqueConnection);
+        connect(plainTextEdit->verticalScrollBar(),SIGNAL(valueChanged(int)),SLOT(renderCurrentCoverage()),Qt::UniqueConnection);
     }
 }
 
@@ -106,7 +138,7 @@ void Visualizer::repaintMarks(bool isRender)
 {
     if (!isRender) {
         markManager->removeAllMarks();
-        markManager->addMark(QLatin1String(""), 0, 0);
+        markManager->addMark(QLatin1String(""), 0);
     } else {
         refreshMarks();
     }
@@ -121,19 +153,10 @@ TextEditor::ITextEditor *Visualizer::currentTextEditor() const
     return qobject_cast<TextEditor::ITextEditor *>(currEditor);
 }
 
-QMap<int, int> Visualizer::getLineCoverage() const
+QMap<int, Mark *> Visualizer::getLineCoverage(Core::IEditor *editor) const
 {
-    using namespace TextEditor;
-    QMap<int, int> lineCoverage;
-
-    ITextEditor *textEditor = currentTextEditor();
-    if (textEditor) {
-        TextMarks marks = textEditor->markableInterface()->marks();
-        foreach (ITextMark *mark, marks) {
-            if (Mark *trueMark = dynamic_cast<Mark *>(mark))
-                lineCoverage.insert(trueMark->lineNumber(), trueMark->getType());
-        }
-    }
-
-    return lineCoverage;
+    if (editor)
+        return markManager->getMarks(editor->document()->fileName());
+    else
+        return QMap<int, Mark *>();
 }

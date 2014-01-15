@@ -1,19 +1,30 @@
 #pragma once
 
+#include <QSharedData>
 #include <texteditor/basetextmark.h>
 
 class MarkManager;
 class Mark : public TextEditor::BaseTextMark
 {
-    MarkManager *manager;
-    int type;
 public:
-    Mark(const QString &fileName, int lineNumber, int type, MarkManager *manager);
+    Mark(const QString &fileName, int lineNumber, MarkManager *manager);
 
-    int getType() const;
+    enum Type
+    {
+        Good,
+        NotHit,
+        NotBranchCovered
+    };
+
+    Type getType() const;
+    void setType(Type type);
 
     void updateLineNumber(int lineNumber);
     void updateBlock(const QTextBlock &block);
     void updateFileName(const QString &fileName);
     void removedFromEditor();
+
+protected:
+    MarkManager *manager;
+    Type type;
 };

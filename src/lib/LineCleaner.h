@@ -5,8 +5,8 @@
 class LineCleaner : public LinePaintHandler
 {
 public:
-    LineCleaner(QPlainTextEdit *textEdit, const QMap<int, int> &lineCoverage);
+    LineCleaner(QPlainTextEdit *textEdit);
 
 protected:
-    QColor getColorForValue(int value) const;
+    QColor getColorForValue(Mark::Type value) const;
 };

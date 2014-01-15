@@ -1,7 +1,5 @@
 #include "MarkManager.h"
 
-#include "Mark.h"
-
 MarkManager::MarkManager(QObject *parent) :
     QObject(parent)
 {
@@ -14,13 +12,26 @@ MarkManager::~MarkManager()
 
 void MarkManager::removeAllMarks()
 {
-    qDeleteAll(marks);
+    foreach (const FileMarks &m, marks) {
+        qDeleteAll(m);
+    }
     marks.clear();
 }
 
-void MarkManager::addMark(const QString &fileName, int lineNumber, int type)
+Mark *MarkManager::addMark(const QString &fileName, int lineNumber)
 {
-    Mark *mark = new Mark(fileName, lineNumber, type, this);
-    marks.insert(fileName, mark);
-    mark->init();
+    Mark *&mark = marks[fileName][lineNumber];
+
+    if (!mark)
+    {
+        mark = new Mark(fileName, lineNumber, this);
+        mark->init();
+    }
+
+    return mark;
+}
+
+QMap<int, Mark *> MarkManager::getMarks(const QString &fileName) const
+{
+    return marks.value(fileName);
 }

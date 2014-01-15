@@ -47,7 +47,7 @@ void Visualizer::refreshMarks()
 
         FileNode *fileNode = static_cast<FileNode *>(leaf);
 
-        QString fileName = fileNode->getFullAbsoluteName().replace(QRegExp(QLatin1String("(Sources|Headers)/")), QLatin1String(""));
+        QString fileName = fileNode->getFullAbsoluteName();
         const LineHitList &lineHitList = fileNode->getLineHitList();
         const BranchCoverageList &branchCoverageList = fileNode->getBranchCoverageList();
 
@@ -79,7 +79,7 @@ void Visualizer::renderCoverage()
 
     EditorManager *editorManager = EditorManager::instance();
 
-    const QList<IEditor *> &editors = editorManager->openedEditors();
+    const QList<IEditor *> &editors = editorManager->visibleEditors();
     foreach (IEditor *editor, editors) {
         if (renderAction->isChecked()) {
             renderCoverage(editor);

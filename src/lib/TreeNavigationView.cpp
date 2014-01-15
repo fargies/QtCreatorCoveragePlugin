@@ -3,6 +3,7 @@
 #include "StateMachine.h"
 #include "PluginState.h"
 
+#include <coreplugin/editormanager/editormanager.h>
 #include <QHeaderView>
 #include <QPainter>
 #include <QMovie>
@@ -23,6 +24,7 @@ TreeNavigationView::TreeNavigationView(QAbstractItemModel *model, StateMachine *
     setContentsMargins(0, 0, 0, 0);
 
     connect(stateMachine,SIGNAL(stateChanged(PluginState*)),SLOT(setState(PluginState*)));
+    connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onItemClicked(QModelIndex)));
 
     waitingMovie->setFileName(QLatin1String(":/cov/animation/loading.gif"));
     animationTimer = new QTimer(this);
@@ -54,4 +56,15 @@ void TreeNavigationView::setState(PluginState *state)
             animationTimer->stop();
         }
     }
+}
+
+void TreeNavigationView::onItemClicked(const QModelIndex &idx)
+{
+    using namespace Core;
+
+    EditorManager *editor = EditorManager::instance();
+    QVariant fileName = model()->data(idx, Qt::UserRole);
+
+    if (fileName.isValid())
+        editor->openEditor(fileName.toString());
 }

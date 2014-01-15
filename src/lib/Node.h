@@ -18,6 +18,9 @@ public:
     virtual QIcon getIcon() const;
     virtual bool isFileNode() const;
 
+    virtual int getLineCount() const;
+    virtual int getLineHitCount() const;
+
     virtual QString getFullAbsoluteName() const;
     QString getFullName() const;
     QString getName() const;
@@ -26,7 +29,7 @@ public:
 
     void addChild(Node *child);
     void removeChild(Node *child);
-    bool hasChild(const QString &name) const;   
+    bool hasChild(const QString &name) const;
     Node *getChild(const QString &name) const;
     bool hasChildren() const;
     QList<Node *> getChildren() const;

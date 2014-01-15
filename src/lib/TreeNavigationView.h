@@ -22,4 +22,5 @@ protected:
 
 private Q_SLOTS:
     void setState(PluginState *state);
+    void onItemClicked(const QModelIndex &idx);
 };

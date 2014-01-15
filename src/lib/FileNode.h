@@ -10,10 +10,12 @@ class FileNode : public Node
 public:
     FileNode(const QString &name, Node *parent);
 
-    QVariant getLineData() const;
     QVariant getBranchData() const;
     QIcon getIcon() const;
     bool isFileNode() const;
+
+    int getLineCount() const;
+    int getLineHitCount() const;
 
     LineHitList getLineHitList() const;
     void setLineHitList(const LineHitList &lineHitList);

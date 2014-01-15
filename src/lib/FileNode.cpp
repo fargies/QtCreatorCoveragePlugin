@@ -7,23 +7,11 @@
 #include <QObject>
 #include <QDebug>
 
+static QRegExp filterRegExp(QLatin1String(".*\\.h"));
+
 FileNode::FileNode(const QString &name, Node *parent) :
     Node(name, parent)
 {
-}
-
-QVariant FileNode::getLineData() const
-{
-    if (lineHitList.isEmpty())
-        return QLatin1String("-");
-
-    int linesCovered = 0;
-    foreach (const LineHit &lineHit, lineHitList)
-        if (lineHit.hit > 0)
-            linesCovered++;
-
-    double linesCoveredPercentage = linesCovered *100 / (double)lineHitList.size();
-    return QObject::tr("%1%").arg(QString::number(linesCoveredPercentage, 'f', 1));
 }
 
 QVariant FileNode::getBranchData() const
@@ -48,18 +36,29 @@ QVariant FileNode::getBranchData() const
 
 QIcon FileNode::getIcon() const
 {
-    const QString &fullName = getFullName();
-    if (fullName.contains(QLatin1String("/Headers/")))
+    if (getName().contains(filterRegExp))
         return IconDecorator::getIconByName(QLatin1String("File.Headers"));
-    if (fullName.contains(QLatin1String("/Sources/")))
+    else
         return IconDecorator::getIconByName(QLatin1String("File.Sources"));
-
-    return Node::getIcon();
 }
 
 bool FileNode::isFileNode() const
 {
     return true;
+}
+
+int FileNode::getLineCount() const
+{
+    return lineHitList.size();
+}
+
+int FileNode::getLineHitCount() const
+{
+    int linesCovered = 0;
+    foreach (const LineHit &lineHit, lineHitList)
+        if (lineHit.hit > 0)
+            linesCovered++;
+    return linesCovered;
 }
 
 LineHitList FileNode::getLineHitList() const

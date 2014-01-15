@@ -96,16 +96,23 @@ QVariant Model::data(const QModelIndex &index, int role) const
 
     Node *node = static_cast<Node*>(index.internalPointer());
 
-    if (role == Qt::DisplayRole) {
+    switch (role) {
+    case Qt::DisplayRole:
         if (column == 0)
             return node->getName();
         else if (column == 1)
             return node->getLineData();
         else if (column == 2)
             return node->getBranchData();
-    } else if (role == Qt::DecorationRole) {
+        break;
+    case Qt::DecorationRole:
         if (column == 0)
             return node->getIcon();
+        break;
+    case Qt::UserRole:
+        if (node->isFileNode())
+            return node->getFullAbsoluteName();
+        break;
     }
 
     return QVariant();

@@ -29,7 +29,12 @@ Node::~Node()
 
 QVariant Node::getLineData() const
 {
-    return QVariant();
+    int lines = getLineCount();
+    if (lines == 0)
+        return QLatin1String("-");
+
+    double linesCoveredPercentage = getLineHitCount() *100 / (double) lines;
+    return QObject::tr("%1%").arg(QString::number(linesCoveredPercentage, 'f', 1));
 }
 
 QVariant Node::getBranchData() const
@@ -45,6 +50,26 @@ QIcon Node::getIcon() const
 bool Node::isFileNode() const
 {
     return false;
+}
+
+int Node::getLineCount() const
+{
+    const QList<Node *> &nodes = getChildren();
+
+    int ret = 0;
+    foreach (Node *node, nodes)
+        ret += node->getLineCount();
+    return ret;
+}
+
+int Node::getLineHitCount() const
+{
+    const QList<Node *> &nodes = getChildren();
+
+    int ret = 0;
+    foreach (Node *node, nodes)
+        ret += node->getLineHitCount();
+    return ret;
 }
 
 QString Node::getFullAbsoluteName() const

@@ -4,6 +4,7 @@
 #include "ActionManager.h"
 
 #include <QAction>
+#include <coreplugin/messagemanager.h>
 
 ExecutionManager::ExecutionManager(ActionManager *actionManager, QObject *parent) :
     QObject(parent),
@@ -17,7 +18,7 @@ ExecutionManager::ExecutionManager(ActionManager *actionManager, QObject *parent
 void ExecutionManager::addExecutor(Executor *executor)
 {    
     connect(executor,SIGNAL(finished()),SLOT(executeNext()));
-    connect(executor,SIGNAL(error()),SLOT(stopExecuting()));
+    connect(executor,SIGNAL(error(QString)),SLOT(error(QString)));
 
     executors << executor;
 }
@@ -52,4 +53,14 @@ void ExecutionManager::stopExecuting()
         isExecuting = false;
         actionManager->getWaitAction()->trigger();
     }
+}
+
+void ExecutionManager::error(const QString &err)
+{
+    if (!err.isEmpty())
+    {
+        using namespace Core;
+        MessageManager::instance()->printToOutputPane(err, MessageManager::Flash);
+    }
+    stopExecuting();
 }

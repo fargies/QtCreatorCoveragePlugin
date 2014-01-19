@@ -33,5 +33,5 @@ void ProjectExecutor::execute()
 void ProjectExecutor::buildingFinished(bool successfully)
 {
     if (!successfully)
-        emit error();
+        emit error(QString());
 }

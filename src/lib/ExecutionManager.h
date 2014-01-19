@@ -21,4 +21,5 @@ private Q_SLOTS:
     void startExecuting();
     void executeNext();
     void stopExecuting();
+    void error(const QString &err);
 };

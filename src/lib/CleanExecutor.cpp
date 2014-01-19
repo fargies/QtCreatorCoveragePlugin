@@ -4,7 +4,7 @@
 #include <projectexplorer/project.h>
 #include <projectexplorer/target.h>
 #include <projectexplorer/projectnodes.h>
-#include <projectexplorer/runconfiguration.h>
+#include <projectexplorer/buildconfiguration.h>
 
 #include <QDebug>
 
@@ -19,11 +19,9 @@ void CleanExecutor::execute()
 
     ProjectExplorerPlugin *projectExplorerPlugin = ProjectExplorerPlugin::instance();
     Project *project = projectExplorerPlugin->startupProject();
+    BuildConfiguration *buildConf = project->activeTarget()->activeBuildConfiguration();
 
-    const QString &activeRunConfigurationDir = getRunConfigurationPath(project->activeTarget()->activeRunConfiguration());
-
-    const QString &buildDir = activeRunConfigurationDir.mid(0, activeRunConfigurationDir.lastIndexOf(QLatin1Char('/')));
-    const QString &objectFilesDir = getObjectFilesDir(buildDir);
+    const QString &objectFilesDir = buildConf->buildDirectory();
 
     const QString program = QLatin1String("lcov");
     const QStringList arguments = {

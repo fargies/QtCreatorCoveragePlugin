@@ -4,8 +4,7 @@
 #include <projectexplorer/project.h>
 #include <projectexplorer/target.h>
 #include <projectexplorer/projectnodes.h>
-#include <projectexplorer/runconfiguration.h>
-#include <projectexplorer/localapplicationrunconfiguration.h>
+#include <projectexplorer/buildconfiguration.h>
 
 #include <QDebug>
 
@@ -13,9 +12,8 @@ ProcessExecutor::ProcessExecutor(QObject *parent) :
     Executor(parent),
     process(new QProcess(this))
 {
-    connect(process,SIGNAL(readyReadStandardOutput()),SLOT(readOutput()));
-    connect(process,SIGNAL(readyReadStandardError()),SLOT(readError()));
     connect(process,SIGNAL(finished(int,QProcess::ExitStatus)),SLOT(handleCoverageResults(int,QProcess::ExitStatus)));
+    connect(process,SIGNAL(error(QProcess::ProcessError)),SLOT(handleError(QProcess::ProcessError)));
 }
 
 void ProcessExecutor::execute()
@@ -24,11 +22,9 @@ void ProcessExecutor::execute()
 
     ProjectExplorerPlugin *projectExplorerPlugin = ProjectExplorerPlugin::instance();
     Project *project = projectExplorerPlugin->startupProject();
+    BuildConfiguration *buildConf = project->activeTarget()->activeBuildConfiguration();
 
-    const QString &activeRunConfigurationDir = getRunConfigurationPath(project->activeTarget()->activeRunConfiguration());
-
-    const QString &buildDir = activeRunConfigurationDir.mid(0, activeRunConfigurationDir.lastIndexOf(QLatin1Char('/')));
-    const QString &objectFilesDir = getObjectFilesDir(buildDir);
+    const QString &objectFilesDir = buildConf->buildDirectory();
 
     const QString &rootDir = project->projectDirectory();
     QDir dir(rootDir);
@@ -41,59 +37,22 @@ void ProcessExecutor::execute()
         objectFilesDir,
         QLatin1String("-c"),
         QLatin1String("-o"),
-        outputFileName,
-        QLatin1String("-b"),
-        buildDir
+        outputFileName
     };
 
     process->start(program, arguments);
 }
 
-void ProcessExecutor::readOutput()
-{
-}
-
-void ProcessExecutor::readError()
-{
-}
-
 void ProcessExecutor::handleCoverageResults(int code, QProcess::ExitStatus exitStatus)
-{    
+{
     if (code == 0 && exitStatus == QProcess::NormalExit)
         emit finished();
     else
-        emit error();
+        emit error(QLatin1String("lcov failure: ") +
+                   QLatin1String(process->readAllStandardError()));
 }
 
-//#TOTEST:
-QString ProcessExecutor::getRunConfigurationPath(ProjectExplorer::RunConfiguration *activeRunConfiguration) const
+void ProcessExecutor::handleError(QProcess::ProcessError)
 {
-    using namespace ProjectExplorer;
-    LocalApplicationRunConfiguration *localConf =
-        qobject_cast<LocalApplicationRunConfiguration *>(activeRunConfiguration);
-    if (localConf)
-        return localConf->workingDirectory();
-
-    return QString();
-}
-
-//#TOTEST:
-QString ProcessExecutor::getObjectFilesDir(const QString &buildDir) const
-{
-    QFile makeFile(buildDir + QLatin1String("/Makefile"));
-    QTextStream out(&makeFile);
-
-    if (makeFile.open(QIODevice::ReadOnly)) {
-        while (!out.atEnd()) {
-            const QString &line = out.readLine();
-
-            QRegExp rx(QLatin1String("OBJECTS_DIR\\s*=\\s*([^\\s]*)$"));
-            if (rx.indexIn(line) != -1) {
-                const QString &objectsDir = rx.cap(1);
-                return QString(QLatin1String("%1/%2")).arg(buildDir).arg(objectsDir);
-            }
-        }
-    }
-
-    return buildDir;
+    emit error(QLatin1String("lcov failure: ") + process->errorString());
 }

@@ -12,5 +12,5 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void finished();
-    void error();
+    void error(const QString &err);
 };

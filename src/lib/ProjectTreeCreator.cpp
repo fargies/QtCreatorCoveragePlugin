@@ -2,10 +2,8 @@
 
 #include "Node.h"
 #include "TreeCreator.h"
-#include <QDebug>
 
-static const char *SPLIT_SEPARATOR = "/";
-static const char *OR_SYMBOL = "|";
+static const QLatin1Char SPLIT_SEPARATOR('/');
 static const int SPECIAL_DIRECTORY_POS = 0;
 
 ProjectTreeCreator::ProjectTreeCreator(const QStringList &fileNames, Node *rootNode) :
@@ -27,10 +25,11 @@ Node *ProjectTreeCreator::getRootNode() const
 
 Node *ProjectTreeCreator::getLeafNodeFromFullName(const QString &fullName, const QString &projectShortName) const
 {
-    const QList<Node *> &leafs = rootNode->findLeafs(fullName.split(QLatin1Char('/')).last());
+    /* TODO: handle relative paths in info file here (remove ../.. from path and compare if matching part is unique) */
+    const QList<Node *> &leafs = rootNode->findLeafs(fullName.split(SPLIT_SEPARATOR).last());
 
     foreach (Node *leaf, leafs)
-        if (leaf->getFullName() == projectShortName + QLatin1String(SPLIT_SEPARATOR) + fullName)
+        if (leaf->getFullName() == projectShortName + SPLIT_SEPARATOR + fullName)
             return leaf;
 
     return 0;

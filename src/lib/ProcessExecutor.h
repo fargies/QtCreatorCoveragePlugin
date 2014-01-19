@@ -22,11 +22,6 @@ public Q_SLOTS:
     void execute();
 
 private Q_SLOTS:
-    void readOutput();
-    void readError();
     void handleCoverageResults(int code,QProcess::ExitStatus exitStatus);
-
-protected:
-    QString getRunConfigurationPath(ProjectExplorer::RunConfiguration *activeRunConfiguration) const;
-    QString getObjectFilesDir(const QString &buildDir) const;
+    void handleError(QProcess::ProcessError err);
 };

@@ -156,7 +156,7 @@ TextEditor::ITextEditor *Visualizer::currentTextEditor() const
 QMap<int, Mark *> Visualizer::getLineCoverage(Core::IEditor *editor) const
 {
     if (editor)
-        return markManager->getMarks(editor->document()->fileName());
+        return markManager->getMarks(editor->document()->filePath());
     else
         return QMap<int, Mark *>();
 }

@@ -14,20 +14,22 @@ ProjectExecutor::ProjectExecutor(QObject *parent) :
     Executor(parent)
 {
     using namespace ProjectExplorer;
-    ProjectExplorerPlugin *projectExplorerPlugin = ProjectExplorerPlugin::instance();
-    connect(projectExplorerPlugin->buildManager(),SIGNAL(buildQueueFinished(bool)),SLOT(buildingFinished(bool)));
+    connect(BuildManager::instance(), SIGNAL(buildQueueFinished(bool)),
+            SLOT(buildingFinished(bool)));
 
-    connect(projectExplorerPlugin,SIGNAL(runControlFinished(ProjectExplorer::RunControl*)),SIGNAL(finished()));
+    connect(ProjectExplorerPlugin::instance(),
+            SIGNAL(runControlFinished(ProjectExplorer::RunControl*)),
+            SIGNAL(finished()));
 }
 
 void ProjectExecutor::execute()
 {
     using namespace ProjectExplorer;
     ProjectExplorerPlugin *projectExplorerPlugin = ProjectExplorerPlugin::instance();
-    Project *startUpProject = projectExplorerPlugin->startupProject();
-    Q_ASSERT(startUpProject);
+    Project *currentProject = projectExplorerPlugin->currentProject();
+    Q_ASSERT(currentProject);
 
-    projectExplorerPlugin->runProject(startUpProject, NormalRunMode);
+    projectExplorerPlugin->runProject(currentProject, NormalRunMode);
 }
 
 void ProjectExecutor::buildingFinished(bool successfully)

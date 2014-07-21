@@ -21,10 +21,10 @@ void ProcessExecutor::execute()
     using namespace ProjectExplorer;
 
     ProjectExplorerPlugin *projectExplorerPlugin = ProjectExplorerPlugin::instance();
-    Project *project = projectExplorerPlugin->startupProject();
+    Project *project = projectExplorerPlugin->currentProject();
     BuildConfiguration *buildConf = project->activeTarget()->activeBuildConfiguration();
 
-    const QString &objectFilesDir = buildConf->buildDirectory();
+    const QString &objectFilesDir = buildConf->buildDirectory().toString();
 
     const QString &rootDir = project->projectDirectory();
     QDir dir(rootDir);

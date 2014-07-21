@@ -60,7 +60,7 @@ void ExecutionManager::error(const QString &err)
     if (!err.isEmpty())
     {
         using namespace Core;
-        MessageManager::instance()->printToOutputPane(err, MessageManager::Flash);
+        MessageManager::write(err, MessageManager::Flash);
     }
     stopExecuting();
 }

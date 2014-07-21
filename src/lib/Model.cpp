@@ -68,7 +68,7 @@ int Model::rowCount(const QModelIndex &parent) const
 int Model::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return 3;
+    return 4;
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
@@ -81,6 +81,8 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
                 return tr("Line");
             if (section == 2)
                 return tr("Branch");
+            if (section == 3)
+                return tr("Count");
         }
     }
 
@@ -104,6 +106,9 @@ QVariant Model::data(const QModelIndex &index, int role) const
             return node->getLineData();
         else if (column == 2)
             return node->getBranchData();
+        else if (column == 3)
+            return QString(QLatin1String("%1/%2")).arg(
+                    node->getLineHitCount()).arg(node->getLineCount());
         break;
     case Qt::DecorationRole:
         if (column == 0)

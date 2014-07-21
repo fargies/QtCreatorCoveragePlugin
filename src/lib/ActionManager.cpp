@@ -22,7 +22,7 @@ ActionManager::ActionManager(QObject *parent) :
     renderAction->setCheckable(true);
 
     // Add action to menu
-    Core::ActionManager *pluginActionManager = Core::ICore::actionManager();           
+    Core::ActionManager *pluginActionManager = Core::ActionManager::instance();
     Core::Command *runCommand = pluginActionManager->registerAction(runAction, RUN_ACTION_ID, Core::Context(Core::Constants::C_GLOBAL));
     Core::Command *renderCommand = pluginActionManager->registerAction(renderAction, RENDER_ACTION_ID, Core::Context(Core::Constants::C_GLOBAL));
     runCommand->setKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_E);
@@ -35,7 +35,7 @@ ActionManager::ActionManager(QObject *parent) :
     pluginActionManager->actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
 
     // Add action as icon to left bar
-    Core::ModeManager *modeManager = Core::ModeManager::instance();
+    Core::ModeManager *modeManager = (Core::ModeManager *) Core::ModeManager::instance();
     modeManager->addAction(runAction, RUN_ACTION_PRIORITY);
     modeManager->addAction(waitAction, WAIT_ACTION_PRIORITY);
 }

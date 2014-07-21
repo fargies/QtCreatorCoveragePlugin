@@ -18,7 +18,7 @@ void ParserExecutor::execute()
 {
     using namespace ProjectExplorer;
 
-    Project *project = ProjectExplorerPlugin::instance()->startupProject();
+    Project *project = ProjectExplorerPlugin::instance()->currentProject();
     const QStringList &fileNames = project->files(Project::ExcludeGeneratedFiles);
     const QRegExp rx(QLatin1String(".*\\.(h|c)"));
     const QString resultFileName = QString(QLatin1String("%1/coverage/result.info")).arg(project->projectDirectory());

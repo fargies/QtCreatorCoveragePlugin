@@ -1,0 +1,12 @@
+Source: qtcreator-coverage-plugin
+Maintainer: 3Hren <division494@gmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 1.0
+Build-Depends: debhelper (>= 9), qtcreator-dev
+
+Package: qtcreator-coverage-plugin
+Architecture: any
+Depends: ${misc:Depends}, qtcreator, lcov, ${shlibs:Depends}
+Description: QtCreator coverage plugin
+ GCov support for QtCreator.

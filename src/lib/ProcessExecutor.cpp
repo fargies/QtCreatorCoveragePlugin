@@ -33,6 +33,7 @@ void ProcessExecutor::execute()
 
     const QString program = QLatin1String("lcov");
     const QStringList arguments = {
+        QLatin1String("--rc"), QLatin1String("lcov_branch_coverage=1"),
         QLatin1String("-d"),
         objectFilesDir,
         QLatin1String("-c"),
